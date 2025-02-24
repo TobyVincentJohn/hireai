@@ -4,8 +4,8 @@ import requests
 # Backend API URL
 BACKEND_URL = "http://127.0.0.1:8000"
 
-st.set_page_config(page_title="System Design Interview", page_icon="🏗️")
-st.title("🏗️ System Design Interview")
+st.set_page_config(page_title="Behavioral Interview", page_icon="🗣️")
+st.title("🗣️ Behavioral Interview")
 
 # Initialize chat history and question if not present
 if "messages" not in st.session_state:
@@ -22,8 +22,8 @@ for msg in st.session_state["messages"]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["text"])
 
-# User input area for system design response
-user_input = st.text_area("Your response:", height=150, placeholder="Describe your system design here...")
+# User input area for behavioral interview response
+user_input = st.text_area("Your response:", height=150, placeholder="Describe your behavioral response here...")
 
 # Submit button
 if st.button("Submit Response"):
@@ -50,3 +50,13 @@ if st.button("Submit Response"):
             st.error("Failed to get follow-up question.")
         
         st.rerun()
+
+# Button to navigate to results
+if st.button("Proceed to Results"):
+    st.session_state["page"] = "results"
+    st.rerun()
+
+# Check if the page should be switched
+if st.session_state.get("page") == "results":
+    st.set_query_params(page="results")
+    st.rerun()

@@ -50,3 +50,13 @@ if st.button("Submit Response"):
             st.error("Failed to get follow-up question.")
         
         st.rerun()
+
+# Button to navigate to results
+if st.button("Proceed to Results"):
+    st.session_state["page"] = "results"
+    st.rerun()
+
+# Check if the page should be switched
+if st.session_state.get("page") == "results":
+    st.set_query_params(page="results")
+    st.rerun()
