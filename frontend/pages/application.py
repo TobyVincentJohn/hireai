@@ -57,7 +57,7 @@ if submit_button:
             response_data = response.json()
             if response.status_code == 200:
                 st.success(response_data["message"])
-                st.switch_page("pages/coding_task.py")
+                st.switch_page("pages/system_design.py")
             else:
                 st.error("⚠️ An error occurred while submitting your application.")
         except Exception as e:

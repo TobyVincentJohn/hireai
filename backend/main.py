@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from abstract_ai import AIWrapper
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
-import os
 from dotenv import load_dotenv
+import os
 import re
 import pymupdf4llm  # Importing the pymupdf4llm library
 
@@ -25,9 +25,6 @@ app.add_middleware(
 # Directory to store uploaded resumes
 UPLOAD_DIR = "resumes"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# Function to read job description from a text file
-
 
 # AI Wrapper Dependency
 def get_ai_wrapper():
@@ -51,15 +48,6 @@ def get_ai_wrapper():
 
 class InputText(BaseModel):
     input_text: str
-
-@app.post("/generate")
-def generate_response(input_text: InputText, ai_wrapper: AIWrapper = Depends(get_ai_wrapper)):
-    """Generates AI response using IBM Granite."""
-    try:
-        response = ai_wrapper.get_response(input_text.input_text)
-        return {"response": response}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI Generation Error: {str(e)}")
 
 def read_pdf(file_path):
     """Read the PDF file and extract text."""
@@ -115,6 +103,21 @@ def compare_resume_to_job_description(resume_text, job_description, ai_wrapper):
     response = ai_wrapper.get_response(input_text)
     return response
 
+@app.post("/generate-system-design")
+async def generate_system_design(input_type: str, context: str = None, ai_wrapper: AIWrapper = Depends(get_ai_wrapper)):
+    """Generate system design questions, feedback, or follow-ups."""
+    try:
+        if input_type == "initial_question":
+            prompt = "Generate a challenging system design interview question."
+        elif input_type == "feedback":
+            prompt = f"Analyze this system design answer and provide feedback:\n\n{context}"
+        elif input_type == "follow_up":
+            prompt = f"Based on the previous answer:\n{context}\nGenerate a relevant follow-up question."
+        
+        response = ai_wrapper.get_response(prompt)
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Generation Error: {str(e)}")
 
 @app.post("/submit-form/")
 async def submit_form(
@@ -162,13 +165,60 @@ async def submit_form(
     return {
         "message": "Form submitted successfully!",
         "application": {
-            # "name": name,
-            # "email": email,
-            # "experience": experience,
-            # "skills": skills,
-            # "job_role": job_role,
-            # "resume_filename": sanitized_filename,
-            # "resume_text": resume_text,  # Include the extracted text in the response
             "comparison_result": comparison_result  # Include the comparison result in the response
         }
     }
+
+@app.get("/resume-scores")
+async def get_resume_scores(ai_wrapper: AIWrapper = Depends(get_ai_wrapper)):
+    """Generate resume scores and explanations using AI."""
+    try:
+        prompt = (
+            "Generate scores and explanations for the following resume sections:\n\n"
+            "1. Relevant Skills\n"
+            "2. Experience\n"
+            "3. Contact Info\n"
+            "4. Achievements\n"
+            "5. Projects\n\n"
+            "Provide the scores as percentages and detailed explanations for each section."
+        )
+        response = ai_wrapper.get_response(prompt)
+        return {"resume_scores": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Generation Error: {str(e)}")
+
+@app.get("/system-design-scores")
+async def get_system_design_scores(ai_wrapper: AIWrapper = Depends(get_ai_wrapper)):
+    """Generate system design scores and explanations using AI."""
+    try:
+        prompt = (
+            "Generate scores and explanations for the following system design interview sections:\n\n"
+            "1. Problem Understanding\n"
+            "2. Solution Design\n"
+            "3. Scalability\n"
+            "4. Trade-offs\n"
+            "5. Communication\n\n"
+            "Provide the scores as percentages and detailed explanations for each section."
+        )
+        response = ai_wrapper.get_response(prompt)
+        return {"system_design_scores": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Generation Error: {str(e)}")
+
+@app.get("/behavioral-scores")
+async def get_behavioral_scores(ai_wrapper: AIWrapper = Depends(get_ai_wrapper)):
+    """Generate behavioral interview scores and explanations using AI."""
+    try:
+        prompt = (
+            "Generate scores and explanations for the following behavioral interview sections:\n\n"
+            "1. Communication\n"
+            "2. Teamwork\n"
+            "3. Problem-Solving\n"
+            "4. Leadership\n"
+            "5. Adaptability\n\n"
+            "Provide the scores as percentages and detailed explanations for each section."
+        )
+        response = ai_wrapper.get_response(prompt)
+        return {"behavioral_scores": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Generation Error: {str(e)}")
