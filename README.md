@@ -36,7 +36,7 @@ hireai
    ```
 4. Run the application:
    ```
-   streamlit run app.py
+   streamlit run home.py
    ```
 
 ## Usage Guidelines
